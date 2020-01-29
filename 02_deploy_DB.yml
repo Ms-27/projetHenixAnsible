@@ -1,0 +1,43 @@
+---
+
+- hosts: databases
+
+  vars:
+          db_name: mantis
+          db_user: autom
+          db_psswrd: autom
+          paquets:
+                  - python3-pip
+                  - postgresql
+                  - postgresql-contrib
+  tasks:
+          - name: Maj des paquets
+            apt:
+                    update_cache: yes
+                    upgrade: yes
+
+          - name: Installation des paquets
+            apt:
+                    name: "{{ item }}"
+                    state: present
+            loop: "{{ paquets }}"
+            notify: Démarrer postgresql
+
+          - name: Installation psycopg2
+            pip:
+                    executable: /usr/bin/pip3
+                    name: psycopg2
+                    state: present
+
+          - name: Création BDD
+            postgresql_db:
+                    name: "{{ db_name }}"
+            become_user: postgres
+
+          - name: Création utilisateur BDD
+
+  handlers:
+          - name: Démarrer postgresql
+            service:
+                    name: postgresql
+                    state: started

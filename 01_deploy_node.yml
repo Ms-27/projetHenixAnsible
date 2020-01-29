@@ -1,0 +1,53 @@
+---
+
+- hosts: localhost
+  gather_facts: false
+
+  vars:
+          docker_img: debian_tp_henix
+          conteneurs:
+                  mantis: 10.0.0.2
+                  mantis_db: 10.0.0.3
+                  mantis_db_backup: 10.0.0.4
+                  reverse_proxy: 10.0.0.5
+  tasks:
+          #          - name: Maj des paquets
+          #            apt:
+          #                    update_cache: yes
+          #                    upgrade: yes
+
+          #          - name: Installation pip3
+          #            apt:
+          #                    name: python3-pip
+          #                    state: present
+
+          - name: Installation docker
+            pip:
+                    executable: /usr/bin/pip3
+                    name: docker
+                    state: present
+
+          - name: Créer le sous-réseau
+            docker_network:
+                    name: subnet0
+                    ipam_config:
+                            - gateway: 10.0.0.254
+                              iprange: 10.0.0.0/24
+                              subnet: 10.0.0.0/24
+
+          - name: Déployer un conteneur
+            docker_container:
+                    name: "{{ item.key }}"
+                    hostname: "{{ item.key }}"
+                    image: "{{ docker_img }}"
+                    state: started
+                    tty: yes
+                    pull: no
+                    purge_networks: yes
+                    networks:
+                            - name: subnet0
+                              ipv4_address: "{{ item.value }}"
+            loop: "{{ conteneurs | dict2items }}"
+
+          - name: Démarrage des serveurs ssh
+            shell: for ct in $(docker ps -q) ; do docker exec -t $ct service ssh start ; done
