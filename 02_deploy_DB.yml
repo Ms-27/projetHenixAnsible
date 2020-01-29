@@ -10,6 +10,9 @@
                   - python3-pip
                   - postgresql
                   - postgresql-contrib
+                  - libpq-dev
+                  - python3-psycopg2
+
   tasks:
           - name: Maj des paquets
             apt:
@@ -23,18 +26,19 @@
             loop: "{{ paquets }}"
             notify: Démarrer postgresql
 
-          - name: Installation psycopg2
-            pip:
-                    executable: /usr/bin/pip3
-                    name: psycopg2
-                    state: present
-
           - name: Création BDD
             postgresql_db:
                     name: "{{ db_name }}"
+                    state: present
             become_user: postgres
 
           - name: Création utilisateur BDD
+            postgresql_user:
+                    name: "{{ db_user }}"
+                    password: "{{ db_psswrd }}"
+                    priv: ALL
+                    state: present
+            become_user: postgres
 
   handlers:
           - name: Démarrer postgresql
