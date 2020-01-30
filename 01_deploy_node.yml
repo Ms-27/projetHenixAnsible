@@ -3,14 +3,11 @@
 - hosts: localhost
   gather_facts: false
 
-  vars:
-          docker_img: debian_tp_henix
-          conteneurs:
-                  mantis: 10.0.0.2
-                  mantis_db: 10.0.0.3
-                  mantis_db_backup: 10.0.0.4
-                  reverse_proxy: 10.0.0.5
   tasks:
+          - name: Charger les variables
+            include_vars:
+                    file: vars.yml
+
           #          - name: Maj des paquets
           #            apt:
           #                    update_cache: yes

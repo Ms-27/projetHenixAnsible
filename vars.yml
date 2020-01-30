@@ -1,0 +1,29 @@
+---
+docker_img: debian_tp_henix
+conteneurs:
+        mantis: 10.0.0.2
+        mantis_db: 10.0.0.3
+        mantis_db_backup: 10.0.0.4
+        reverse_proxy: 10.0.0.5
+db_name: mantis
+db_user: autom
+db_psswrd: autom
+paquets_db:
+        - python3-pip
+        - postgresql
+        - postgresql-contrib
+        - python3-psycopg2
+        - sudo
+paquets_webapp:
+        - apache2
+        - php7.4
+        - php7.4-curl
+        - php7.4-gd
+        - php7.4-fileinfo
+        - php7.4-mbstring
+        - php7.4-pgsql
+php_repo: "deb https://packages.sury.org/php/ buster main"
+php_key: "https://packages.sury.org/php/apt.gpg"
+db:
+        mantis_db: 10.0.0.3
+        mantis_db_backup: 10.0.0.4

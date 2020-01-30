@@ -1,0 +1,12 @@
+<VirtualHost 10.0.0.2:80>
+	ServerName srvmantisbt
+	DocumentRoot /var/www/html/mantisbt
+	<Directory /var/www/html/mantisbt>
+	Options Indexes FollowSymLinks MultiViews
+	AllowOverride All
+	Require all granted
+	</Directory>
+	ServerSignature off
+	ErrorLog ${APACHE_LOG_DIR}/error.log
+	CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>

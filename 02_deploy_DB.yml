@@ -2,42 +2,41 @@
 
 - hosts: databases
 
-  vars:
-          db_name: mantis
-          db_user: autom
-          db_psswrd: autom
-          paquets:
-                  - python3-pip
-                  - postgresql
-                  - postgresql-contrib
-                  - libpq-dev
-                  - python3-psycopg2
-
   tasks:
+          - name: Charger les variables
+            include_vars:
+                    file: vars.yml
+
           - name: Maj des paquets
             apt:
                     update_cache: yes
                     upgrade: yes
-
           - name: Installation des paquets
             apt:
                     name: "{{ item }}"
                     state: present
-            loop: "{{ paquets }}"
+            loop: "{{ paquets_db }}"
             notify: Démarrer postgresql
+
+          - name: Démmarer le service postgresql
+            service:
+                    name: postgresql
+                    state: started
 
           - name: Création BDD
             postgresql_db:
-                    name: "{{ db_name }}"
+                    name: "{{ db_name }}" 
                     state: present
+            become: true
             become_user: postgres
 
           - name: Création utilisateur BDD
             postgresql_user:
                     name: "{{ db_user }}"
                     password: "{{ db_psswrd }}"
-                    priv: ALL
                     state: present
+                    login_user: postgres
+            become: true
             become_user: postgres
 
   handlers:

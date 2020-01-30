@@ -1,0 +1,25 @@
+---
+
+- hosts: reverse_proxy
+
+  tasks:
+          - name: Charger les variables
+            include_vars:
+                    file: vars.yml
+
+          - name: Maj des paquets
+            apt:
+                    update_cache: yes
+                    upgrade: yes
+
+          - name: Installation Nginx
+            apt:
+                    name: nginx
+                    state: present
+            notify: Lancer Nginx
+
+  handlers:
+          - name: Lancer Nginx
+            service:
+                    name: nginx
+                    state: started
