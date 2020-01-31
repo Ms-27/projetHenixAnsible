@@ -1,0 +1,11 @@
+---
+
+- hosts: mantis_db
+
+  roles:
+          - ansible-role-postgresql-dump
+
+- hosts: mantis_db_backup
+
+  roles:
+          - ansible-role-postgresql-import
