@@ -7,10 +7,14 @@
             include_vars:
                     file: vars.yml
 
+          - name: fix apt
+            shell: apt -y --fix-broken install
+
           - name: Maj des paquets
             apt:
                     update_cache: yes
                     upgrade: yes
+
           - name: Installation des paquets
             apt:
                     name: "{{ item }}"

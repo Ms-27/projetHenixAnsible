@@ -53,4 +53,3 @@
             #            lineinfile:
                     #                    path: /etc/ansible/hosts
                     #                    state: present
-

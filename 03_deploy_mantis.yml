@@ -18,6 +18,9 @@
             apt_key:
                     url: "{{ php_key }}"
 
+          - name: fix apt
+            shell: apt -y --fix-broken install
+
           - name: Maj des paquets
             apt:
                     update_cache: yes
@@ -40,17 +43,28 @@
                     dest: ~/
             notify: Installation mantis
 
+          - name: Décompression de l'archive mantis
+            unarchive:  
+                    remote_src: yes
+                    src: ~/mantisbt-2.23.0.tar.gz
+                    dest: /var/www/html/
+            #listen: Installation mantis
+
+          - name: Renommer le répertoire de mantis
+            shell: mv /var/www/html/mantisbt-2.23.0 /var/www/html/mantisbt
+            #listen: Installation mantis
+
           - name: Créer VirtualHost
             template:
                     src: mantisbt.conf.j2
                     dest: /etc/apache2/sites-available/mantisbt.conf
             notify: Relancer apache
 
-          - name: Configuration BDD mantis
-            template:
-                    src: config_inc.php.j2
-                    dest: /var/www/html/mantisbt/config/config_inc.php
-            notify: Relancer apache
+          #- name: Configuration BDD mantis
+            #template:
+                    #src: config_inc.php.j2
+                    #dest: /var/www/html/mantisbt/config/config_inc.php
+            #notify: Relancer apache
 
   handlers:
           - name: Décompression de l'archive mantis
