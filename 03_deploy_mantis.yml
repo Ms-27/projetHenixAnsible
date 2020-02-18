@@ -1,84 +1,64 @@
 ---
 
 - hosts: mantis
+  gather_facts: false
 
   tasks:
-          - name: Charger les variables
-            include_vars:
-                    file: vars.yml
+    - name: Charger les variables
+      include_vars:
+        file: vars.yml
 
-          - name: Ajouter php7 à sourcelist
-            apt_repository:
-                    repo: "{{ php_repo }}"
-                    state: present
-                    filename: php
-                    update_cache: no
+    - name: Ajouter php7 à sourcelist
+      apt_repository:
+        repo: "{{ php_repo }}"
+        state: present
+        filename: php
+        update_cache: no
 
-          - name: Récupérer le clé gpg
-            apt_key:
-                    url: "{{ php_key }}"
+    - name: Récupérer le clé gpg
+      apt_key:
+        url: "{{ php_key }}"
 
-          - name: fix apt
-            shell: apt -y --fix-broken install
+    - name: Apt fix
+      shell: apt -y --fix-broken install
 
-          - name: Maj des paquets
-            apt:
-                    update_cache: yes
-                    upgrade: yes
+    - name: Maj des paquets
+      apt:
+        update_cache: yes
+        upgrade: 'yes'
 
-          - name: Installation de "{{ paquets_webapp }}"
-            apt:
-                    name: "{{item }}"
-                    state: latest
-            loop: "{{ paquets_webapp }}"
+    - name: Installation de "{{ paquets_webapp }}"
+      apt:
+        name: "{{item }}"
+        state: latest
+      loop: "{{ paquets_webapp }}"
 
-          - name: Lancer apache
-            service:
-                    name: apache2
-                    state: started
+    - name: Téléchargement de Mantis
+      get_url:
+        url: https://sourceforge.net/projects/mantisbt/files/mantis-stable/2.23.0/mantisbt-2.23.0.tar.gz
+        dest: ~/
+      notify: Installation mantis
 
-          - name: Téléchargement de Mantis
-            get_url:
-                    url: https://sourceforge.net/projects/mantisbt/files/mantis-stable/2.23.0/mantisbt-2.23.0.tar.gz
-                    dest: ~/
-            notify: Installation mantis
+    - meta: flush_handlers
 
-          - name: Décompression de l'archive mantis
-            unarchive:  
-                    remote_src: yes
-                    src: ~/mantisbt-2.23.0.tar.gz
-                    dest: /var/www/html/
-            #listen: Installation mantis
+    - name: Créer VirtualHost
+      template:
+        src: mantisbt.conf.j2
+        dest: /etc/apache2/sites-available/mantisbt.conf
 
-          - name: Renommer le répertoire de mantis
-            shell: mv /var/www/html/mantisbt-2.23.0 /var/www/html/mantisbt
-            #listen: Installation mantis
-
-          - name: Créer VirtualHost
-            template:
-                    src: mantisbt.conf.j2
-                    dest: /etc/apache2/sites-available/mantisbt.conf
-            notify: Relancer apache
-
-          #- name: Configuration BDD mantis
-            #template:
-                    #src: config_inc.php.j2
-                    #dest: /var/www/html/mantisbt/config/config_inc.php
-            #notify: Relancer apache
+    - name: Lancer apache
+      service:
+        name: apache2
+        state: started
 
   handlers:
-          - name: Décompression de l'archive mantis
-            unarchive:
-                    remote_src: yes
-                    src: ~/mantisbt-2.23.0.tar.gz
-                    dest: /var/www/html/
-            listen: Installation mantis
+    - name: Décompression de l'archive mantis
+      unarchive:
+        remote_src: yes
+        src: ~/mantisbt-2.23.0.tar.gz
+        dest: /var/www/html/
+      listen: Installation mantis
 
-          - name: Renommer le répertoire de mantis
-            shell: mv /var/www/html/mantisbt-2.23.0 /var/www/html/mantisbt
-            listen: Installation mantis
-
-          - name: Relancer apache
-            service:
-                    name: apache2
-                    state: restarted
+    - name: Renommer le répertoire de mantis
+      shell: mv /var/www/html/mantisbt-2.23.0 /var/www/html/mantisbt
+      listen: Installation mantis

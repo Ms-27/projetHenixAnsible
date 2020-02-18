@@ -4,52 +4,79 @@
   gather_facts: false
 
   tasks:
-          - name: Charger les variables
-            include_vars:
-                    file: vars.yml
+    - name: Charger les variables
+      include_vars:
+        file: vars.yml
 
-          #          - name: Maj des paquets
-          #            apt:
-          #                    update_cache: yes
-          #                    upgrade: yes
+    - name: Maj des paquets
+      apt:
+        update_cache: yes
+        upgrade: 'yes'
+      become: yes
 
-          #          - name: Installation pip3
-          #            apt:
-          #                    name: python3-pip
-          #                    state: present
+    - name: Installation pip3
+      apt:
+        name: python3-pip
+        state: present
+      become: yes
 
-          - name: Installation docker
-            pip:
-                    executable: /usr/bin/pip3
-                    name: docker
-                    state: present
+    - name: Installation docker
+      pip:
+        executable: /usr/bin/pip3
+        name: docker
+        state: present
 
-          - name: Créer le sous-réseau
-            docker_network:
-                    name: subnet0
-                    ipam_config:
-                            - gateway: 10.0.0.254
-                              iprange: 10.0.0.0/24
-                              subnet: 10.0.0.0/24
+    - name: Créer le sous-réseau
+      docker_network:
+        name: subnet0
+        ipam_config:
+          - gateway: 10.0.0.254
+            iprange: 10.0.0.0/24
+            subnet: 10.0.0.0/24
 
-          - name: Déployer un conteneur
-            docker_container:
-                    name: "{{ item.key }}"
-                    hostname: "{{ item.key }}"
-                    image: "{{ docker_img }}"
-                    state: started
-                    tty: yes
-                    pull: no
-                    purge_networks: yes
-                    networks:
-                            - name: subnet0
-                              ipv4_address: "{{ item.value }}"
-            loop: "{{ conteneurs | dict2items }}"
+    - name: Déployer un conteneur
+      docker_container:
+        name: "{{ item.key }}"
+        hostname: "{{ item.key }}"
+        image: "{{ docker_img }}"
+        state: started
+        tty: yes
+        pull: no
+        purge_networks: yes
+        networks_cli_compatible: yes
+        networks:
+          - name: subnet0
+            ipv4_address: "{{ item.value }}"
+      loop: "{{ conteneurs | dict2items }}"
 
-          - name: Démarrage des serveurs ssh
-            shell: for ct in $(docker ps -q) ; do docker exec -t $ct service ssh start ; done
+    - name: Démarrage des serveurs ssh
+      shell: for ct in $(docker ps -q) ; do docker exec -t $ct service ssh start ; done
 
-            #          - name: Inscrire le conteneur dans /etc/ansible/hosts
-            #            lineinfile:
-                    #                    path: /etc/ansible/hosts
-                    #                    state: present
+    - name: Modification de /etc/ansible/hosts
+      blockinfile:
+        path: /etc/ansible/hosts
+        state: present
+        block: |
+          localhost:ansible_python_interpreter=python3
+
+          [containers]
+          mantis
+          mantis_db
+          mantis_db_backup
+          reverse_proxy
+
+          [databases]
+          mantis_db
+          mantis_db_backup
+      become: yes
+
+    - name: Modification de /etc/hosts 
+      blockinfile:
+        path: /etc/hosts
+        state: present
+        block: | 
+          10.0.0.2        mantis
+          10.0.0.3        mantis_db
+          10.0.0.4        mantis_db_backup
+          10.0.0.5        reverse_proxy
+      become: yes

@@ -1,53 +1,53 @@
 ---
 
 - hosts: reverse_proxy
+  gather_facts: false
 
   tasks:
-          - name: Charger les variables
-            include_vars:
-                    file: vars.yml
+    - name: Charger les variables
+      include_vars:
+        file: vars.yml
 
-          - name: fix apt
-            shell: apt -y --fix-broken install
+    - name: Apt fix
+      shell: apt -y --fix-broken install
 
-          - name: Maj des paquets
-            apt:
-                    update_cache: yes
-                    upgrade: yes
+    - name: Maj des paquets
+      apt:
+        update_cache: yes
+        upgrade: 'yes'
 
-          - name: Installation Nginx
-            apt:
-                    name: nginx
-                    state: present
-            notify: Unlink default
+    - name: Installation Nginx
+      apt:
+        name: nginx
+        state: present
 
-          - name: Copier fichier de conf
-            copy:
-                    src: reverse-proxy.conf.j2
-                    dest: /etc/nginx/sites-available/reverse-proxy.conf
+    - name: Lancer Nginx
+      service:
+        name: nginx
+        state: started
+      notify: Configuration Nginx
 
-          - name: Créer un lien symbolique
-            file:
-                    src: /etc/nginx/sites-available/reverse-proxy.conf
-                    dest: /etc/nginx/sites-enabled/reverse-proxy.conf
-                    state: link
+    - meta: flush_handlers
 
-          - name: Créer VirtualHost
-            template:
-                    src: mantisbt.conf.j2
-                    dest: /etc/nginx/sites-available/mantisbt.conf
-            #notify: Lancer Nginx
-
-          - name: Lancer Nginx
-            service:
-                    name: nginx
-                    state: started
+    - name: Relancer Nginx
+      service:
+        name: nginx
+        state: restarted
 
   handlers:
-          - name: Unlink default
-            shell: unlink /etc/nginx/sites-enabled/default
+    - name: Unlink le fichier default
+      shell: unlink /etc/nginx/sites-enabled/default
+      listen: Configuration Nginx
 
-          - name: Lancer Nginx
-            service:
-                    name: nginx
-                    state: started
+    - name: Copier fichier de configuration
+      copy:
+        src: reverse-proxy.conf.j2
+        dest: /etc/nginx/sites-available/reverse-proxy.conf
+      listen: Configuration Nginx
+
+    - name: Créer un lien symbolique
+      file:
+        src: /etc/nginx/sites-available/reverse-proxy.conf
+        dest: /etc/nginx/sites-enabled/reverse-proxy.conf
+        state: link
+      listen: Configuration Nginx

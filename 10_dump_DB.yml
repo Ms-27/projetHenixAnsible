@@ -3,46 +3,39 @@
 - hosts: mantis_db
 
   tasks:
-          - name: Charger les variables
-            include_vars:
-                    file: vars.yml
+    - name: Charger les variables
+      include_vars:
+        file: vars.yml
 
-          - name: Exporter la BDD dans un fichier
-            postgresql_db:
-                    name: "{{ db_name }}"
-                    state: dump
-                    target: ~/mantis_db_backup.sql
-            become: true
-            become_user: postgres
+    - name: Exporter la BDD dans un fichier
+      postgresql_db:
+        name: "{{ db_name }}"
+        state: dump
+        target: /tmp/mantis_db_backup.sql
+      become: true
+      become_user: postgres
 
-          - name: Import test
-            postgresql_db:
-                    name: "{{ db_name }}"
-                    state: restore
-                    target: ~/mantis_db_backup.sql
-            become: true
-            become_user: postgres
-
-          - name: Copier le fichier sur le controleur
-            fetch:
-                    src: ~/mantis_db_backup.sql
-                    dest: ~/DB_backup/mantis_db_backup.sql
+    - name: Copier le fichier sur le controleur
+      fetch:
+        src: /tmp/mantis_db_backup.sql
+        dest: /tmp/
 
 - hosts: mantis_db_backup
 
   tasks:
-          - name: Copier le fichier sur le host
-            copy:
-                    src: ~/DB_backup/mantis_db_backup.sql
-                    dest: ~/mantis_db_backup.sql
+    - name: Charger les variables
+      include_vars:
+        file: vars.yml
 
-          - name: Changer les droits du fichier
-            file:
-                    path: ~/mantis_db_backup.sql
-                    mode: 0777
-                    owner: root
+    - name: Copier le fichier sur le host
+      copy:
+        src: /tmp/mantis_db/tmp/mantis_db_backup.sql
+        dest: /tmp/mantis_db_backup.sql
 
-          - name: Importer la BDD depuis le fichier
-            shell: psql mantis < ~/mantis_db_backup.sql
-            become: true
-            become_user: postgres
+    - name: Importer la BDD depuis un fichier
+      postgresql_db:
+        name: "{{ db_name }}"
+        state: restore
+        target: /tmp/mantis_db_backup.sql
+      become: true
+      become_user: postgres

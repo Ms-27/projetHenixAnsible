@@ -1,50 +1,44 @@
 ---
 
 - hosts: databases
+  gather_facts: false
 
   tasks:
-          - name: Charger les variables
-            include_vars:
-                    file: vars.yml
+    - name: Charger les variables
+      include_vars:
+        file: vars.yml
 
-          - name: fix apt
-            shell: apt -y --fix-broken install
+    - name: Apt fix
+      shell: apt --fix-broken install
 
-          - name: Maj des paquets
-            apt:
-                    update_cache: yes
-                    upgrade: yes
+    - name: Maj des paquets
+      apt:
+        update_cache: yes
+        upgrade: 'yes'
 
-          - name: Installation des paquets
-            apt:
-                    name: "{{ item }}"
-                    state: present
-            loop: "{{ paquets_db }}"
-            notify: Démarrer postgresql
+    - name: Installation des paquets
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop: "{{ paquets_db }}"
 
-          - name: Démmarer le service postgresql
-            service:
-                    name: postgresql
-                    state: started
+    - name: Démmarer Postgresql
+      service:
+        name: postgresql
+        state: started
 
-          - name: Création BDD
-            postgresql_db:
-                    name: "{{ db_name }}" 
-                    state: present
-            become: true
-            become_user: postgres
+    - name: Création BDD
+      postgresql_db:
+        name: "{{ db_name }}" 
+        state: present
+      become: true
+      become_user: postgres
 
-          - name: Création utilisateur BDD
-            postgresql_user:
-                    name: "{{ db_user }}"
-                    password: "{{ db_psswrd }}"
-                    state: present
-                    login_user: postgres
-            become: true
-            become_user: postgres
-
-  handlers:
-          - name: Démarrer postgresql
-            service:
-                    name: postgresql
-                    state: started
+    - name: Création utilisateur BDD
+      postgresql_user:
+        name: "{{ db_user }}"
+        password: "{{ db_psswrd }}"
+        state: present
+        login_user: postgres
+      become: true
+      become_user: postgres

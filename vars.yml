@@ -1,5 +1,5 @@
 ---
-docker_img: debian_tp_henix
+docker_img: debian-ansible
 conteneurs:
         mantis: 10.0.0.2
         mantis_db: 10.0.0.3
@@ -25,6 +25,3 @@ paquets_webapp:
         - php7.4-pgsql
 php_repo: "deb https://packages.sury.org/php/ buster main"
 php_key: "https://packages.sury.org/php/apt.gpg"
-db:
-        mantis_db: 10.0.0.3
-        mantis_db_backup: 10.0.0.4
