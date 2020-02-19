@@ -2,6 +2,7 @@
 
 - hosts: localhost
   gather_facts: false
+  become: yes
 
   tasks:
     - name: Charger les variables
@@ -12,13 +13,11 @@
       apt:
         update_cache: yes
         upgrade: 'yes'
-      become: yes
 
     - name: Installation pip3
       apt:
         name: python3-pip
         state: present
-      become: yes
 
     - name: Installation docker
       pip:
@@ -33,6 +32,7 @@
           - gateway: 10.0.0.254
             iprange: 10.0.0.0/24
             subnet: 10.0.0.0/24
+      become_user: "{{ localhost_user }}"
 
     - name: Déployer un conteneur
       docker_container:
@@ -48,6 +48,7 @@
           - name: subnet0
             ipv4_address: "{{ item.value }}"
       loop: "{{ conteneurs | dict2items }}"
+      become_user: "{{ localhost_user }}"
 
     - name: Démarrage des serveurs ssh
       shell: for ct in $(docker ps -q) ; do docker exec -t $ct service ssh start ; done
@@ -68,7 +69,6 @@
           [databases]
           mantis_db
           mantis_db_backup
-      become: yes
 
     - name: Modification de /etc/hosts 
       blockinfile:
@@ -79,4 +79,3 @@
           10.0.0.3        mantis_db
           10.0.0.4        mantis_db_backup
           10.0.0.5        reverse_proxy
-      become: yes

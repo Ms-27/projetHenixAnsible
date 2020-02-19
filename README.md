@@ -1,22 +1,30 @@
-# Avant exécution des playbooks
+# Objectifs:
+Instancier quatre conteneurs avec Ansible:
+    - Un contenant la webapp Mantis
+    - Deux contenant une BDD postgres (BDD principal et backup)
+    - Un reverse proxy
 
-- builder image docker
+# Au préalable:
+Builder l'image docker
 
-# WIP
-
-problème de droit sur le module apt
-
-! pour que ça marche ! :
-
-Exécuter une 1ère fois en root:
-
-    - casse sur la création du sous-réseau docker
-
-Exécuter une 2ème fois en user 'normal'
+    - debian-ansible/Dockerfile
 
 
-# WIP
+# Les playbooks:
+Zxécuter les quatre playbooks
 
-Gestion du dump de BDD
+    - 01_deploy_nodes.yml (exécuter en root)
+    - 02_deploy_DB.yml
+    - 03_deploy_mantis.yml
+    - 04_deploy_reverse_proxy.yml 
 
-    - done
+
+# Gestion du dump de BDD:
+Copie l'export de la BDD du conteneur principal vers le backup
+
+    - 10_dump_DB.yml
+
+# Annexes:
+Le fichier vars contient les différentes variables:
+
+    - vars.yml

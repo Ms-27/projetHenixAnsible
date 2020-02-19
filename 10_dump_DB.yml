@@ -1,6 +1,7 @@
 ---
 
 - hosts: mantis_db
+  gather_facts: false
 
   tasks:
     - name: Charger les variables
@@ -21,6 +22,7 @@
         dest: /tmp/
 
 - hosts: mantis_db_backup
+  gather_facts: false
 
   tasks:
     - name: Charger les variables

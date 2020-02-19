@@ -1,4 +1,5 @@
 ---
+localhost_user: formation
 docker_img: debian-ansible
 conteneurs:
         mantis: 10.0.0.2
