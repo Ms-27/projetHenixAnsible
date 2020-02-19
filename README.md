@@ -1,5 +1,6 @@
 # Objectifs:
 Instancier quatre conteneurs avec Ansible:
+
     - Un contenant la webapp Mantis
     - Deux contenant une BDD postgres (BDD principal et backup)
     - Un reverse proxy
