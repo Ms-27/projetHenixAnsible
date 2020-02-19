@@ -11,7 +11,7 @@ Builder l'image docker
 
 
 # Les playbooks:
-Zxécuter les quatre playbooks
+Exécuter les quatre playbooks
 
     - 01_deploy_nodes.yml (exécuter en root)
     - 02_deploy_DB.yml
